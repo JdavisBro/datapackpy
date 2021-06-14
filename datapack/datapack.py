@@ -13,20 +13,6 @@ def load(func):
         return func(*args)
     return wrapper
 
-def entity(name:str=None,type:str=None):
-    out = ""
-    for i in [('name',name),('type',type)]:
-        if i[1] is None: continue
-        out += f"{i[0]}={i[1]}"
-    return "@e" if not out else f"@e[{out}]"
-
-def player(name:str=None):
-    out = ""
-    for i in [('name',name)]:
-        if i[1] is None: continue
-        out += f"{i[0]}={i[1]}"
-    return "@p" if not out else f"@p[{out}]"
-
 def _check_then_write(path,write):
     if not os.path.exists(path):
         open(path,"x")
@@ -92,7 +78,7 @@ class Datapack():
         self.description = getattr(self,"__doc__","A Datapack")
         os.makedirs(os.path.join(self.name,"data",self.name.lower(),"functions"),exist_ok=True)
         fn = os.path.join(self.name,"pack.mcmeta")
-        _check_then_write(fn,json.dumps({"pack":{"pack_format":7,"description":self.description}}))
+        _check_then_write(fn,json.dumps({"pack":{"pack_format":7,"description":self.description}},indent=4))
         self._load = []
         self._tick = []
         for i in dir(self):

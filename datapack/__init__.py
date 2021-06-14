@@ -1,2 +1,2 @@
 from .datapack import *
-from .constants import *
+from . import selector
