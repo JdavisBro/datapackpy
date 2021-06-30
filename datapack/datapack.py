@@ -33,6 +33,40 @@ class Execute():
     def ex_run(self,command):
         self.subcommands.append(f"run {command}")
 
+class Scoreboard():
+    def __init__(self,function,objective,add=False,criteria="dummy",displayname=None):
+        self.objective = objective
+        self.commands = function.commands
+        self.displayname = displayname if displayname else objective
+        self.trigger = criteria == "trigger"
+        if add:
+            self.commands.append(f"scoreboard objectives add {objective} {criteria}{(' ' + displayname) if displayname else ''}")
+
+    def delete(self,ret=False):
+        if ret:
+            return f"scoreboard objectives remove {self.objective}"
+        self.commands.append(f"scoreboard objectives remove {self.objective}")
+
+    def setdisplay(self,slot,ret=False):
+        if ret:
+            return f"scoreboard setdisplay {slot} {self.objective}"
+        self.commands.append(f"scoreboard setdisplay {slot} {self.objective}")
+
+    def modify_displayname(self,displayname=None,ret=False):
+        if not displayname: displayname = self.objective
+        if ret:
+            return f"scoreboard objectives modify {self.objective} displayname {json.dumps(displayname,separators=(',', ':'))}"
+        self.commands.append(f"scoreboard objectives modify {self.objective} displayname {json.dumps(displayname,separators=(',', ':'))}")
+
+    def modify_rendertype(self,hearts,ret=False):
+        if isinstance(hearts,(bool,int)):
+            rendertype = "hearts" if hearts else "integer"
+        elif isinstance(hearts,str):
+            rendertype = "hearts" if hearts.lower() == "hearts" else "integer"
+        if ret:
+            return f"scoreboard objectives modify {self.objective} rendertype {rendertype}"
+        self.commands.append(f"scoreboard objectives modify {self.objective} rendertype {rendertype}")
+
 class Function():
     def __init__(self,name,parent):
         self.name = name
@@ -72,6 +106,19 @@ class Function():
     def execute(self):
         return Execute(self)
 
+    def scoreboard(self,objective,add=False,criteria="dummy",displayname=None):
+        return Scoreboard(self,objective,add,criteria,displayname)
+
+    def scoreboard_list(self,ret=False):
+        if ret:
+            return f"scoreboard objectives list"
+        self.commands.append(f"scoreboard objectives list")
+
+    def scoreboard_setdisplay(self,slot,ret=False):
+        if ret:
+            return f"scoreboard objectives setdisplay {slot}"
+        self.commands.append(f"scoreboard objectives setdisplay {slot}")
+
 class Datapack():
     def __init__(self):
         self.name = type(self).__name__
@@ -100,4 +147,3 @@ class Datapack():
             if self._load:
                 fn = os.path.join(self.name,"data","minecraft","tags","functions","load.json")
                 _check_then_write(fn,json.dumps({"values":self._load}))
-    
